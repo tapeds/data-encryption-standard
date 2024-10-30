@@ -1,4 +1,4 @@
-```from constants import pc1_table, pc2_table, shift_positions, ip_table, ip_inv_table, expansion_table, p_table, s_boxes
+from constants import pc1_table, pc2_table, shift_positions, ip_table, ip_inv_table, expansion_table, p_table, s_boxes
 
 sub_keys = []
 
@@ -144,4 +144,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-```
