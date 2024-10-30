@@ -1,4 +1,4 @@
-from constants import pc1_table, pc2_table, shift_positions, ip_table, ip_inv_table, expansion_table, p_table, s_boxes
+```from constants import pc1_table, pc2_table, shift_positions, ip_table, ip_inv_table, expansion_table, p_table, s_boxes
 
 sub_keys = []
 
@@ -70,41 +70,56 @@ def final_permutation(bits):
 
 def des_encrypt(plaintext):
     key_setup('reynaldi')
-    binary_plaintext = text_to_bin(plaintext)
+    padded_plaintext = plaintext.ljust((len(plaintext) + 7) // 8 * 8, '\x00')
+    ciphertext = ""
 
-    if len(binary_plaintext) < 64:
-        binary_plaintext = binary_plaintext.ljust(64, '0')
-    else:
-        binary_plaintext = binary_plaintext[:64]
-    permuted_bits = initial_permutation(binary_plaintext)
-    left_half = permuted_bits[:32]
-    right_half = permuted_bits[32:]
+    for i in range(0, len(padded_plaintext), 8):
+        block = padded_plaintext[i:i+8]
+        binary_plaintext = text_to_bin(block)
 
-    for round_number in range(16):
-        left_half, right_half = des_round(left_half, right_half, round_number)
+        if len(binary_plaintext) < 64:
+            binary_plaintext = binary_plaintext.ljust(64, '0')
+        else:
+            binary_plaintext = binary_plaintext[:64]
 
-    final_bits = right_half + left_half
-    final_permuted_bits = final_permutation(final_bits)
-    binary_result = ''.join(map(str, final_permuted_bits))
+        permuted_bits = initial_permutation(binary_plaintext)
+        left_half = permuted_bits[:32]
+        right_half = permuted_bits[32:]
 
-    hex_result = hex(int(binary_result, 2))[2:].upper().zfill(16)
-    return hex_result
+        for round_number in range(16):
+            left_half, right_half = des_round(left_half, right_half, round_number)
+
+        final_bits = right_half + left_half
+        final_permuted_bits = final_permutation(final_bits)
+        binary_result = ''.join(map(str, final_permuted_bits))
+
+        block_hex_result = hex(int(binary_result, 2))[2:].upper().zfill(16)
+        ciphertext += block_hex_result
+
+    return ciphertext
 
 def des_decrypt(ciphertext):
     key_setup('reynaldi')
-    binary_ciphertext = bin(int(ciphertext, 16))[2:].zfill(64)
-    permuted_bits = initial_permutation(binary_ciphertext)
-    left_half = permuted_bits[:32]
-    right_half = permuted_bits[32:]
+    plaintext = ""
 
-    for round_number in reversed(range(16)):
-        left_half, right_half = des_round(left_half, right_half, round_number)
+    for i in range(0, len(ciphertext), 16):
+        block_hex = ciphertext[i:i+16]
+        binary_ciphertext = bin(int(block_hex, 16))[2:].zfill(64)
+        permuted_bits = initial_permutation(binary_ciphertext)
+        left_half = permuted_bits[:32]
+        right_half = permuted_bits[32:]
 
-    final_bits = right_half + left_half
-    final_permuted_bits = final_permutation(final_bits)
-    binary_result = ''.join(map(str, final_permuted_bits))
-    plaintext = bin_to_text(binary_result)
-    return plaintext.strip('\x00')  
+        for round_number in reversed(range(16)):
+            left_half, right_half = des_round(left_half, right_half, round_number)
+
+        final_bits = right_half + left_half
+        final_permuted_bits = final_permutation(final_bits)
+        binary_result = ''.join(map(str, final_permuted_bits))
+
+        block_plaintext = bin_to_text(binary_result)
+        plaintext += block_plaintext
+
+    return plaintext.strip('\x00')
 
 def main():
     key_setup()
@@ -129,3 +144,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+```
